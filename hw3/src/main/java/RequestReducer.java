@@ -1,4 +1,3 @@
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -8,7 +7,7 @@ import java.io.IOException;
 /**
  * @author Anastasiia_Iurshina
  */
-public class RequestReducer extends Reducer<Text, LongWritable, Text, DoubleWritable> {
+public class RequestReducer extends Reducer<Text, LongWritable, Text, IntDoublePair> {
 
     @Override
     protected void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
@@ -19,6 +18,6 @@ public class RequestReducer extends Reducer<Text, LongWritable, Text, DoubleWrit
             count++;
         }
 
-        context.write(key, new DoubleWritable((double) sum / count));
+        context.write(key, new IntDoublePair(sum, (double) sum / count));
     }
 }
