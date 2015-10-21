@@ -1,8 +1,8 @@
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.SnappyCodec;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -19,20 +19,26 @@ public class BytesCounter extends Configured implements Tool {
         System.exit(1);
     }
 
-    public int run(String[] args) throws Exception {
-        Job job = Job.getInstance(new Configuration());
+    public int run(final String[] args) throws Exception {
+        Configuration configuration = new Configuration();
+        configuration.set("mapred.textoutputformat.separator", ",");
+
+        Job job = Job.getInstance(configuration);
 
         job.setJarByClass(getClass());
         job.setJobName(getClass().getName());
 
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileOutputFormat.setCompressOutput(job, true);
+        FileOutputFormat.setOutputCompressorClass(job, SnappyCodec.class);
 
-        job.setMapperClass(RequestMapper.class);
-        job.setReducerClass(RequestReducer.class);
+        job.setMapperClass(CounterMapper.class);
+        job.setCombinerClass(CounterCombiner.class);
+        job.setReducerClass(CounterReducer.class);
 
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(LongWritable.class);
+        job.setOutputValueClass(IntDoublePair.class);
 
         return job.waitForCompletion(true) ? 0 : 1;
     }

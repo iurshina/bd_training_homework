@@ -6,40 +6,51 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 /**
+ * Custom writable type.
+ *
  * @author Anastasiia_Iurshina
  */
 public class IntDoublePair implements WritableComparable {
 
-    private long sum;
-    private double avg;
+    private long longValue;
+    private double doubleValue;
 
     public IntDoublePair() {
     }
 
-    public IntDoublePair(final long sum, final double avg) {
-        this.sum = sum;
-        this.avg = avg;
+    public IntDoublePair(final long longValue, final double doubleValue) {
+        this.longValue = longValue;
+        this.doubleValue = doubleValue;
     }
 
-    public void write(DataOutput out) throws IOException {
-        out.writeLong(sum);
-        out.writeDouble(avg);
+    public long getLongValue() {
+        return longValue;
     }
 
-    public void readFields(DataInput in) throws IOException {
-        sum = in.readLong();
-        avg = in.readDouble();
+    public double getDoubleValue() {
+        return doubleValue;
+    }
+
+    public void write(final DataOutput out) throws IOException {
+        out.writeLong(longValue);
+        out.writeDouble(doubleValue);
+    }
+
+    public void readFields(final DataInput in) throws IOException {
+        longValue = in.readLong();
+        doubleValue = in.readDouble();
     }
 
     @Override
     public int hashCode() {
-        return (int) (sum * 157 + avg);
+        return 31 * Long.valueOf(longValue).hashCode() + Long.valueOf(Double.doubleToLongBits(doubleValue)).hashCode();
     }
+
     @Override
-    public boolean equals(Object right) {
+    public boolean equals(final Object right) {
         if (right instanceof IntDoublePair) {
             IntDoublePair r = (IntDoublePair) right;
-            return r.sum == sum && r.avg == avg;
+            return r.longValue == longValue && r.doubleValue == doubleValue;
         } else {
             return false;
         }
@@ -61,21 +72,21 @@ public class IntDoublePair implements WritableComparable {
         WritableComparator.define(IntDoublePair.class, new Comparator());
     }
 
-    public int compareTo(Object that) {
+    public int compareTo(final Object that) {
         if (that == null) {
             return -1;
         }
 
-        int sumRes = Long.compare(this.sum, ((IntDoublePair) that).sum);
+        int sumRes = Long.compare(this.longValue, ((IntDoublePair) that).longValue);
         if (sumRes != 0) {
             return sumRes;
         }
 
-        return Double.compare(this.avg, ((IntDoublePair) that).avg);
+        return Double.compare(this.doubleValue, ((IntDoublePair) that).doubleValue);
     }
 
     @Override
     public String toString() {
-        return avg + "," + sum;
+        return doubleValue + "," + longValue;
     }
 }
