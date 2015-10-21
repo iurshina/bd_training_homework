@@ -1,3 +1,5 @@
+package values;
+
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 
@@ -10,15 +12,15 @@ import java.io.IOException;
  *
  * @author Anastasiia_Iurshina
  */
-public class IntDoublePair implements WritableComparable {
+public class LongDoublePair implements WritableComparable {
 
     private long longValue;
     private double doubleValue;
 
-    public IntDoublePair() {
+    public LongDoublePair() {
     }
 
-    public IntDoublePair(final long longValue, final double doubleValue) {
+    public LongDoublePair(final long longValue, final double doubleValue) {
         this.longValue = longValue;
         this.doubleValue = doubleValue;
     }
@@ -48,8 +50,8 @@ public class IntDoublePair implements WritableComparable {
 
     @Override
     public boolean equals(final Object right) {
-        if (right instanceof IntDoublePair) {
-            IntDoublePair r = (IntDoublePair) right;
+        if (right instanceof LongDoublePair) {
+            LongDoublePair r = (LongDoublePair) right;
             return r.longValue == longValue && r.doubleValue == doubleValue;
         } else {
             return false;
@@ -59,7 +61,7 @@ public class IntDoublePair implements WritableComparable {
     public static class Comparator extends WritableComparator {
 
         public Comparator() {
-            super(IntDoublePair.class);
+            super(LongDoublePair.class);
         }
 
         public int compare(byte[] b1, int s1, int l1,
@@ -69,7 +71,7 @@ public class IntDoublePair implements WritableComparable {
     }
 
     static {
-        WritableComparator.define(IntDoublePair.class, new Comparator());
+        WritableComparator.define(LongDoublePair.class, new Comparator());
     }
 
     public int compareTo(final Object that) {
@@ -77,12 +79,12 @@ public class IntDoublePair implements WritableComparable {
             return -1;
         }
 
-        int sumRes = Long.compare(this.longValue, ((IntDoublePair) that).longValue);
+        int sumRes = Long.compare(this.longValue, ((LongDoublePair) that).longValue);
         if (sumRes != 0) {
             return sumRes;
         }
 
-        return Double.compare(this.doubleValue, ((IntDoublePair) that).doubleValue);
+        return Double.compare(this.doubleValue, ((LongDoublePair) that).doubleValue);
     }
 
     @Override

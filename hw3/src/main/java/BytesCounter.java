@@ -9,7 +9,12 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import values.LongDoublePair;
+import values.LongPair;
+
 /**
+ * Counts average bytes count per request by IP and total bytes by IP.
+ *
  * @author Anastasiia_Iurshina
  */
 public class BytesCounter extends Configured implements Tool {
@@ -30,6 +35,7 @@ public class BytesCounter extends Configured implements Tool {
 
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
         FileOutputFormat.setCompressOutput(job, true);
         FileOutputFormat.setOutputCompressorClass(job, SnappyCodec.class);
 
@@ -38,7 +44,8 @@ public class BytesCounter extends Configured implements Tool {
         job.setReducerClass(CounterReducer.class);
 
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(IntDoublePair.class);
+        job.setMapOutputValueClass(LongPair.class);
+        job.setOutputValueClass(LongDoublePair.class);
 
         return job.waitForCompletion(true) ? 0 : 1;
     }

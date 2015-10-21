@@ -1,22 +1,29 @@
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import values.LongDoublePair;
+import values.LongPair;
+
 import java.io.IOException;
 
 /**
+ * Result:
+ *   LongDoublePair longValue   - total count of bytes
+ *   LongDoublePair doubleValue - average count of bytes
+ *
  * @author Anastasiia_Iurshina
  */
-public class CounterReducer extends Reducer<Text, IntDoublePair, Text, IntDoublePair> {
+public class CounterReducer extends Reducer<Text, LongPair, Text, LongDoublePair> {
 
     @Override
-    protected void reduce(final Text key, final Iterable<IntDoublePair> values, final Context context) throws IOException, InterruptedException {
+    protected void reduce(final Text key, final Iterable<LongPair> values, final Context context) throws IOException, InterruptedException {
         long sum = 0;
         double count = 0;
-        for (IntDoublePair value : values) {
-            sum += value.getLongValue();
-            count += value.getDoubleValue();
+        for (LongPair value : values) {
+            sum += value.getFirst();
+            count += value.getSecond();
         }
 
-        context.write(key, new IntDoublePair(sum, sum / count));
+        context.write(key, new LongDoublePair(sum, ((double) sum) / count));
     }
 }
