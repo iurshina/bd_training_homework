@@ -1,6 +1,7 @@
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.SnappyCodec;
 import org.apache.hadoop.mapreduce.Job;
@@ -9,7 +10,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-
 import values.LongDoublePair;
 import values.LongPair;
 
@@ -21,13 +21,16 @@ import values.LongPair;
 public class BytesCounter extends Configured implements Tool {
 
     public static void main(final String[] args) throws Exception {
-        ToolRunner.run(new Configuration(), new BytesCounter(), args);
+        ToolRunner.run(new BytesCounter(), args);
         System.exit(1);
     }
 
     public int run(final String[] args) throws Exception {
-        Configuration configuration = new Configuration();
+        Configuration configuration = getConf();
         configuration.set("mapred.textoutputformat.separator", ",");
+        configuration.set("mapreduce.output.fileoutputformat.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
+        configuration.set("mapreduce.output.fileoutputformat.compress", "true");
+        configuration.set("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
 
         Job job = Job.getInstance(configuration);
 
@@ -45,9 +48,11 @@ public class BytesCounter extends Configured implements Tool {
         job.setMapOutputValueClass(LongPair.class);
         job.setOutputValueClass(LongDoublePair.class);
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
-        //TODO: doesn't work?
-        FileOutputFormat.setCompressOutput(job, true);
-        FileOutputFormat.setOutputCompressorClass(job, SnappyCodec.class);
+
+        //TODO: doesn't work with SequenceFileOutputFormat?!
+        SequenceFileOutputFormat.setCompressOutput(job, true);
+        SequenceFileOutputFormat.setOutputCompressorClass(job, SnappyCodec.class);
+        SequenceFileOutputFormat.setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
 
         return job.waitForCompletion(true) ? 0 : 1;
     }

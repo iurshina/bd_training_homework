@@ -20,18 +20,18 @@ public enum Browser {
             return Browser.OTHERS;
         }
 
-        String token = tokens[11];
-        if (tokens[11] == null) {
+        String userAgent = tokens[11];
+        if (userAgent == null) {
             return Browser.OTHERS;
         }
 
-        token = token.toLowerCase();
+        userAgent = userAgent.toLowerCase();
 
-        if (token.contains(Browser.MOZILLA.name)) {
+        if (userAgent.contains(Browser.MOZILLA.name)) {
             return Browser.MOZILLA;
-        } else if (token.contains(Browser.OPERA.name)) {
+        } else if (userAgent.contains(Browser.OPERA.name)) {
             return Browser.OPERA;
-        } else if (token.contains(Browser.SAFARI.name)) {
+        } else if (userAgent.contains(Browser.SAFARI.name)) {
             return Browser.SAFARI;
         }
 

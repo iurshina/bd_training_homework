@@ -32,8 +32,10 @@ public class CounterMapper extends Mapper<LongWritable, Text, Text, LongPair> {
         }
 
         try {
+            final long bytes = Long.parseLong(tokens[9]);
+
             context.getCounter(Browser.getCounter(tokens)).increment(1);;
-            context.write(new Text(tokens[0]), new LongPair(Integer.valueOf(tokens[9]), 1));
+            context.write(new Text(tokens[0]), new LongPair(bytes, 1));
         } catch (NumberFormatException e) {
             System.err.println("Bytes count is not a number: " + key.toString());
             context.setStatus("Detected possibly corrupt record: see logs.");
