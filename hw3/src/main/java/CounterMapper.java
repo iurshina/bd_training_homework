@@ -1,3 +1,5 @@
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -15,6 +17,8 @@ import java.io.IOException;
  */
 public class CounterMapper extends Mapper<LongWritable, Text, Text, LongPair> {
 
+    private static final Log LOG = LogFactory.getLog(CounterMapper.class);
+
     enum LineFormat {
         UNEXPECTED_LINE_LENGTH,
         NO_NUMBER
@@ -25,7 +29,7 @@ public class CounterMapper extends Mapper<LongWritable, Text, Text, LongPair> {
         String[] tokens = value.toString().split("\\s+");
 
         if (tokens.length < 10) {
-            System.err.println("Unexpected line length: " + key.toString());
+            LOG.error("Unexpected line length: " + key.toString());
             context.setStatus("Detected possibly corrupt record: see logs.");
             context.getCounter(LineFormat.UNEXPECTED_LINE_LENGTH).increment(1);
             return;
@@ -37,7 +41,7 @@ public class CounterMapper extends Mapper<LongWritable, Text, Text, LongPair> {
             context.getCounter(Browser.getCounter(tokens)).increment(1);;
             context.write(new Text(tokens[0]), new LongPair(bytes, 1));
         } catch (NumberFormatException e) {
-            System.err.println("Bytes count is not a number: " + key.toString());
+            LOG.error("Bytes count is not a number: " + key.toString());
             context.setStatus("Detected possibly corrupt record: see logs.");
             context.getCounter(LineFormat.NO_NUMBER).increment(1);
         }

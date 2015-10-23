@@ -1,4 +1,3 @@
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -26,19 +25,16 @@ public class BytesCounter extends Configured implements Tool {
     }
 
     public int run(final String[] args) throws Exception {
-        Configuration configuration = getConf();
-        configuration.set("mapred.textoutputformat.separator", ",");
-        configuration.set("mapreduce.output.fileoutputformat.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
-        configuration.set("mapreduce.output.fileoutputformat.compress", "true");
-        configuration.set("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
-
-        Job job = Job.getInstance(configuration);
+        Job job = Job.getInstance(getConf());
 
         job.setJarByClass(getClass());
         job.setJobName(getClass().getName());
 
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileOutputFormat.setCompressOutput(job, true);
+        FileOutputFormat.setOutputCompressorClass(job, SnappyCodec.class);
+        SequenceFileOutputFormat.setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
 
         job.setMapperClass(CounterMapper.class);
         job.setCombinerClass(CounterCombiner.class);
@@ -48,11 +44,6 @@ public class BytesCounter extends Configured implements Tool {
         job.setMapOutputValueClass(LongPair.class);
         job.setOutputValueClass(LongDoublePair.class);
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
-
-        //TODO: doesn't work with SequenceFileOutputFormat?!
-        SequenceFileOutputFormat.setCompressOutput(job, true);
-        SequenceFileOutputFormat.setOutputCompressorClass(job, SnappyCodec.class);
-        SequenceFileOutputFormat.setOutputCompressionType(job, SequenceFile.CompressionType.BLOCK);
 
         return job.waitForCompletion(true) ? 0 : 1;
     }
