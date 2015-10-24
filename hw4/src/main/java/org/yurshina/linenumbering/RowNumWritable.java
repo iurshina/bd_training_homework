@@ -12,59 +12,56 @@ import java.io.IOException;
  */
 public class RowNumWritable implements Writable {
 
-    private long count;
+    //used if contains offset info
+    private long offset;
     private int partition;
-    private Text value;
 
-    private static final Text EMPTY_STRING = new Text("");
+    //used if it's a row from file
+    private Text line;
 
-    public void setValue(final Text value) {
-        this.value = value;
-        if (value.getLength() == 0) {
-            this.count = 0;
-            this.partition = 0;
-        }
+    public void setLine(final Text line) {
+        this.line = line;
     }
 
-    public void setCounter(final int partition, final long count) {
-        this.value = EMPTY_STRING;
+    public void setOffset(final long offset) {
+        this.offset = offset;
+    }
+
+    public void setPartition(final int partition) {
         this.partition = partition;
-        this.count = count;
     }
 
-    public long getCount() {
-        return count;
+    public long getOffset() {
+        return offset;
     }
 
     public int getPartition() {
         return partition;
     }
 
-    public Text getValue() {
-        return value;
+    public Text getLine() {
+        return line;
     }
 
     public void write(final DataOutput out) throws IOException {
-        value.write(out);
-        if (value.getLength() == 0) {
+        if (line == null) {
             out.writeInt(partition);
-            out.writeLong(count);
+            out.writeLong(offset);
+            line = new Text("");
         }
+
+        line.write(out);
     }
 
     public void readFields(final DataInput in) throws IOException {
-        if (value == null) {
-            value = new Text();
+        if (line == null) {
+            line = new Text();
         }
 
-        value.readFields(in);
-
-        if (value.getLength() == 0) {
+        if (line.getLength() == 0) {
             partition = in.readInt();
-            count = in.readLong();
-        } else {
-            partition = 0;
-            count = 0;
+            offset = in.readLong();
         }
+        line.readFields(in);
     }
 }

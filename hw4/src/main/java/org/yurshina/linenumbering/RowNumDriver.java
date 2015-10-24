@@ -10,6 +10,8 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 /**
+ * Numerates rows in the files from the provided directory.
+ *
  * @author Anastasiia_Iurshina
  */
 public class RowNumDriver extends Configured implements Tool {
@@ -28,7 +30,6 @@ public class RowNumDriver extends Configured implements Tool {
         job.setJobName(getClass().getName());
 
         job.setMapperClass(RowNumMapper.class);
-        job.setGroupingComparatorClass(RowNumOutputValueGroupingComparator.class);
         job.setSortComparatorClass(RowNumOutputKeyComparator.class);
 
         job.setPartitionerClass(RowNumPartitioner.class);
