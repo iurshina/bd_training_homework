@@ -31,7 +31,6 @@ public class RowNumDriver extends Configured implements Tool {
 
         job.setMapperClass(RowNumMapper.class);
         job.setSortComparatorClass(RowNumOutputKeyComparator.class);
-
         job.setPartitionerClass(RowNumPartitioner.class);
         job.setReducerClass(RowNumReducer.class);
         job.setNumReduceTasks(9);

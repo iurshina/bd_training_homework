@@ -9,7 +9,7 @@ import java.io.IOException;
 
 /**
  * Takes the offset in the first calls (since keys are sorted in a way to put key indicating
- * offset info first) in the following calls which contains data from one of the files uses the offset.
+ * offset info first), in the following calls which contains data from one of the files use the offset.
  *
  * @author Anastasiia_Iurshina
  */

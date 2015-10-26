@@ -6,8 +6,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Partitioner;
 
 /**
- * If the key indicates that it's an offset info object, returns the number of reducer this info is for,
- * otherwise calculates the number of reducer based on the file name.
+ * If the key indicates that it's an offset info object, returns the index of reducer this info is for,
+ * otherwise calculates the index of reducer based on the file name.
  *
  * @author Anastasiia_Iurshina
  */
