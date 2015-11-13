@@ -5,8 +5,8 @@ import eu.bitwalker.useragentutils.UserAgent;
 import org.apache.hadoop.hive.ql.exec.UDF;
 import org.apache.hadoop.hive.ql.udf.UDFType;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parses user agent.
@@ -16,7 +16,7 @@ import java.util.Map;
 @UDFType(deterministic = false)
 public class ParseUserAgent extends UDF {
 
-    public Map<String, String> evaluate(String row) {
+    public List<String> evaluate(String row) {
         if (row == null) {
             return null;
         }
@@ -31,11 +31,11 @@ public class ParseUserAgent extends UDF {
 
         UserAgent userAgent = UserAgent.parseUserAgentString(userAgentString);
 
-        Map<String, String> res = new HashMap<String, String>();
-        res.put("Browser", userAgent.getBrowser().getName());
-        res.put("OS", userAgent.getOperatingSystem().getName());
-        res.put("Device", userAgent.getOperatingSystem().getDeviceType().getName());
-        res.put("City", city);
+        List<String> res = new ArrayList<String>();
+        res.add(userAgent.getBrowser().getName());
+        res.add(userAgent.getOperatingSystem().getName());
+        res.add(userAgent.getOperatingSystem().getDeviceType().getName());
+        res.add(city);
 
         return res;
     }
