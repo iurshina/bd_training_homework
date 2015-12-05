@@ -19,7 +19,16 @@ object Main {
     val carriers = loadCsvFile("/home/nastya/java/Big data training/carriers.csv", sqlc).cache()
     carriers.registerTempTable("Carriers")
 
+    val airports = loadCsvFile("/home/nastya/java/Big data training/airports.csv", sqlc).cache()
+    airports.registerTempTable("Airports")
+
     flightsDao.numberOfFlights().collect().foreach(println(_))
+
+    println(flightsDao.numberOfFlightsJuneNYC())
+
+    flightsDao.mostBusyAirportsJunAug().collect().foreach(println(_))
+
+    println(flightsDao.carrierLargestNumerOfFlights())
   }
 
   def loadCsvFile(path: String, sqlContext: SQLContext): DataFrame = {
