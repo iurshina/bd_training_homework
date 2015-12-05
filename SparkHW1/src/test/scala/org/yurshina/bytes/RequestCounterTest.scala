@@ -1,7 +1,7 @@
-package org.yurshina
+package org.yurshina.bytes
 
 import org.apache.spark.{SparkConf, SparkContext}
-import org.scalatest.{BeforeAndAfter, Matchers, GivenWhenThen, FlatSpec}
+import org.scalatest.{BeforeAndAfter, FlatSpec, GivenWhenThen, Matchers}
 
 class RequestCounterTest extends FlatSpec with GivenWhenThen with Matchers with BeforeAndAfter {
 

@@ -1,4 +1,4 @@
-package org.yurshina
+package org.yurshina.bytes
 
 import org.apache.spark.{SparkConf, SparkContext}
 
