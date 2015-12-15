@@ -9,7 +9,7 @@ case class AlertMessage(ip: String, actualValue: Double, limit: Double, period: 
   }
 }
 
-object KafkaPublisher {
+object KafkaHelper {
 
   val TOPIC = "alerts"
 

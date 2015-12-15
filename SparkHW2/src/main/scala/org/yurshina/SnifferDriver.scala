@@ -2,12 +2,14 @@ package org.yurshina
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.hive.HiveContext
+import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Minutes, Seconds, StreamingContext}
 import org.apache.spark.{Logging, SparkConf}
+import org.yurshina.HiveHelper.Settings
 
 import scala.collection.mutable
 
-object Main extends Logging {
+object SnifferDriver extends Logging {
 
   def main(args: Array[String]) {
     setStreamingLogLevels()
@@ -22,7 +24,18 @@ object Main extends Logging {
     val thresholdSettings = HiveHelper.load(1)
     val dstream = ssc.receiverStream(new PCap4jReceiver())
 
-    //check the specified ips
+    val specifiedIds = checkSpecifiedIps(limitSettings, thresholdSettings, dstream)
+    checkUpspecifiedIps(limitSettings, thresholdSettings, specifiedIds, dstream)
+
+    TrafficAnalyzer.hourlyStatistics(dstream)
+
+    ssc.start()
+    ssc.awaitTermination()
+  }
+
+  def checkSpecifiedIps(limitSettings: scala.collection.Map[String, Settings],
+                        thresholdSettings: scala.collection.Map[String, Settings],
+                        dstream: DStream[NetworkPacket]): (mutable.MutableList[String], mutable.MutableList[String]) = {
     var specifiedLimitIps = mutable.MutableList[String]()
     limitSettings.foreach {
       e => {
@@ -30,13 +43,14 @@ object Main extends Logging {
         val period = e._2.period
         val limit = e._2.value
 
-        TrafficAnalyzer.checkForLimit(dstream, (packet: NetworkPacket) => packet.ip.equals(ip), Minutes(period), limit)
+        TrafficAnalyzer.checkForLimit(dstream, (packet: NetworkPacket) => packet.ip.equals(ip), Minutes(period),
+          limit)
         specifiedLimitIps += ip
       }
     }
 
     var specifiedThrshIps = mutable.MutableList[String]()
-    limitSettings.foreach {
+    thresholdSettings.foreach {
       e => {
         val ip = e._1
         val period = e._2.period
@@ -48,18 +62,20 @@ object Main extends Logging {
       }
     }
 
-    //check the rest with default values
+    (specifiedLimitIps, specifiedThrshIps)
+  }
+
+  def checkUpspecifiedIps(limitSettings: scala.collection.Map[String, Settings],
+                          thresholdSettings: scala.collection.Map[String, Settings],
+                          specifiedIds: (mutable.MutableList[String], mutable.MutableList[String]),
+                          dstream: DStream[NetworkPacket]): Unit = {
     val defaultLimSettings = limitSettings.get("NULL").get
     val defaultThSettings = thresholdSettings.get("NULL").get
 
-    TrafficAnalyzer.checkForLimit(dstream, (packet: NetworkPacket) => !specifiedLimitIps.contains(packet.ip),
+    TrafficAnalyzer.checkForLimit(dstream, (packet: NetworkPacket) => !specifiedIds._1.contains(packet.ip),
       Minutes(defaultLimSettings.period), defaultLimSettings.value)
-    TrafficAnalyzer.checkForThreshold(dstream, (packet: NetworkPacket) => !specifiedThrshIps.contains(packet.ip),
+    TrafficAnalyzer.checkForThreshold(dstream, (packet: NetworkPacket) => !specifiedIds._2.contains(packet.ip),
       Minutes(defaultThSettings.period), defaultThSettings.value)
-    TrafficAnalyzer.hourlyStatistics(dstream)
-
-    ssc.start()
-    ssc.awaitTermination()
   }
 
   def setStreamingLogLevels() {
